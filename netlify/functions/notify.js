@@ -2,11 +2,11 @@ exports.handler = async (event) => {
   try {
     const { code, name, brand, model } = JSON.parse(event.body);
 
-    const res = await fetch("https://onesignal.com/api/v1/notifications", {
+    const res = await fetch("https://api.onesignal.com/notifications", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Basic os_v2_app_e3lj5cc65fbnniu7k5fu6bwru5gsh3m3t57uiln43aelojrgwctegxrglla6efjeovhcqp3tnji2zcklzmyd3raezlfmkhtgaqwb4oi"
+        "Authorization": "Key os_v2_app_e3lj5cc65fbnniu7k5fu6bwru7gu6qz7hlfepm4tuubvyx2wevh4pqeokavucazh2rgibzzg7kycokqy5k3ghmmq7i34u7ixmhwi7vi"
       },
       body: JSON.stringify({
         app_id: "26d69e88-5ee9-42d6-a29f-574b4f06d1a7",
