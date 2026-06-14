@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پنل مدیریت | یزدانی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1e;--bg2:#0d1530;--accent:#00d4d4;--accent2:#00f5f5;
+  --glass:rgba(255,255,255,0.045);--bd:rgba(255,255,255,0.10);
+  --hi:#e8f0fe;--mid:#a8bcd8;--low:#5a7aaa;
+  --success:#34d399;--error:#f87171;--warn:#facc15;
+  --r:12px;
+}
+body{font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--hi);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 80% 10%,rgba(30,77,183,0.25),transparent 60%),radial-gradient(ellipse at 10% 80%,rgba(14,45,90,0.2),transparent 60%);pointer-events:none}
+
+/* ── Login ── */
+#login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.login-box{background:var(--glass);border:1px solid var(--bd);border-radius:20px;padding:40px 36px;width:360px;backdrop-filter:blur(20px);position:relative}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo .icon{width:56px;height:56px;background:linear-gradient(135deg,#1a3a7e,#0d2456);border:1px solid var(--bd);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 8px 32px rgba(79,156,249,0.18)}
+.login-logo h2{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,#e8f0fe,#6dd5ed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.login-logo p{font-size:0.8rem;color:var(--mid)}
+.login-box label{display:block;font-size:0.8rem;color:var(--mid);margin-bottom:6px;margin-top:16px}
+.login-box input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:11px 14px;color:var(--hi);font-family:'Vazirmatn',sans-serif;font-size:0.9rem;outline:none;transition:border-color .2s}
+.login-box input:focus{border-color:var(--accent)}
+.btn-login{width:100%;margin-top:20px;padding:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;border-radius:8px;color:#fff;font-family:'Vazirmatn',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-login:hover{box-shadow:0 6px 24px rgba(37,99,235,0.5);transform:translateY(-1px)}
+.login-err{font-size:0.8rem;color:var(--error);text-align:center;margin-top:10px;display:none}
+
+/* ── App ── */
+#app{display:none;min-height:100vh;position:relative;z-index:1}
+.topbar{background:rgba(13,21,48,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-brand .ticon{width:36px;height:36px;background:linear-gradient(135deg,#1a3a7e,#0d2456);border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.topbar-brand h1{font-size:1rem;font-weight:700;background:linear-gradient(135deg,#e8f0fe,#6dd5ed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.badge-count{background:rgba(79,156,249,0.15);border:1px solid rgba(79,156,249,0.3);color:var(--accent);font-size:0.78rem;padding:3px 10px;border-radius:20px}
+.btn-logout{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);color:#f87171;font-family:'Vazirmatn',sans-serif;font-size:0.8rem;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .2s}
+.btn-logout:hover{background:rgba(248,113,113,0.2)}
+
+.main-wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
+
+/* ── Stats ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:640px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--glass);border:1px solid var(--bd);border-radius:var(--r);padding:16px;backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)}
+.stat-label{font-size:0.75rem;color:var(--low);margin-bottom:6px}
+.stat-val{font-size:1.6rem;font-weight:700;color:var(--hi)}
+.stat-sub{font-size:0.72rem;color:var(--mid);margin-top:3px}
+
+/* ── Filter bar ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{background:rgba(255,255,255,0.04);border:1px solid var(--bd);color:var(--mid);font-family:'Vazirmatn',sans-serif;font-size:0.8rem;padding:7px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
+.filter-btn:hover{border-color:rgba(79,156,249,0.4);color:var(--hi)}
+.filter-btn.active{background:rgba(79,156,249,0.15);border-color:var(--accent);color:var(--accent)}
+.search-box{flex:1;min-width:180px;position:relative}
+.search-box input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:20px;padding:7px 14px 7px 36px;color:var(--hi);font-family:'Vazirmatn',sans-serif;font-size:0.82rem;outline:none;transition:border-color .2s;direction:rtl}
+.search-box input:focus{border-color:var(--accent)}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--low)}
+
+/* ── Table ── */
+.table-wrap{background:var(--glass);border:1px solid var(--bd);border-radius:var(--r);backdrop-filter:blur(12px);overflow:hidden}
+.table-head{display:grid;grid-template-columns:110px 1fr 1fr 110px 100px 90px 110px 80px;gap:8px;padding:10px 16px;border-bottom:1px solid var(--bd);font-size:0.75rem;color:var(--low);font-weight:500}
+.repair-row{display:grid;grid-template-columns:110px 1fr 1fr 110px 100px 90px 110px 80px;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center;font-size:0.83rem;transition:background .2s;cursor:pointer}
+.repair-row:hover{background:rgba(255,255,255,0.03)}
+.repair-row:last-child{border-bottom:none}
+@media(max-width:768px){
+  .table-head{display:none}
+  .repair-row{grid-template-columns:1fr 1fr;gap:6px;padding:14px 16px}
+  .repair-row>*:nth-child(n+5){grid-column:1/-1}
+}
+.code-badge{font-size:0.75rem;font-weight:600;color:var(--accent);font-family:monospace;letter-spacing:.5px}
+.name-cell{font-weight:500}
+.device-cell{color:var(--mid);font-size:0.8rem}
+.date-cell{color:var(--low);font-size:0.78rem}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:500;white-space:nowrap}
+.s-pending{background:rgba(250,204,21,0.12);border:1px solid rgba(250,204,21,0.3);color:#facc15}
+.s-checking{background:rgba(79,156,249,0.12);border:1px solid rgba(79,156,249,0.3);color:#4f9cf9}
+.s-priced{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);color:#a855f7}
+.s-approved{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);color:#34d399}
+.s-done{background:rgba(100,116,139,0.12);border:1px solid rgba(100,116,139,0.3);color:#94a3b8}
+.price-cell{font-weight:600;color:var(--hi)}
+.btn-detail{background:rgba(79,156,249,0.1);border:1px solid rgba(79,156,249,0.25);color:var(--accent);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.btn-detail:hover{background:rgba(79,156,249,0.2)}
+.btn-delete-row{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:#f87171;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.btn-delete-row:hover{background:rgba(248,113,113,0.2)}
+.empty-state{padding:48px;text-align:center;color:var(--low)}
+.loading-state{padding:48px;text-align:center;color:var(--mid);font-size:0.9rem}
+.cd-accepted{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;padding:2px 7px;border-radius:10px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#34d399;white-space:nowrap}
+.cd-rejected{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;padding:2px 7px;border-radius:10px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:#f87171;white-space:nowrap}
+.cd-waiting{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;padding:2px 7px;border-radius:10px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.25);color:#facc15;white-space:nowrap}
+
+/* ── Star Rating Display ── */
+.admin-stars{display:inline-flex;gap:2px;align-items:center}
+.admin-stars .s{font-size:1rem;color:rgba(255,255,255,0.15)}
+.admin-stars .s.on{color:#facc15}
+.rating-summary{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;padding:4px 10px;border-radius:10px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.25);color:#facc15}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#0d1530;border:1px solid var(--bd);border-radius:20px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;position:relative}@media(max-width:600px){.modal-overlay{padding:0;align-items:flex-end}.modal{border-radius:20px 20px 0 0;max-height:92vh;width:100%}}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#0d1530;z-index:10}
+.modal-header h3{font-size:1rem;font-weight:600}
+.modal-close{background:rgba(255,255,255,0.06);border:1px solid var(--bd);color:var(--mid);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:all .2s}
+.modal-close:hover{color:var(--hi);background:rgba(255,255,255,0.1)}
+.modal-body{padding:20px 24px 24px}
+.info-section{margin-bottom:20px}
+.info-section h4{font-size:0.78rem;color:var(--accent);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-item{background:rgba(255,255,255,0.03);border:1px solid var(--bd);border-radius:8px;padding:10px 12px}
+.info-item.full{grid-column:1/-1}
+.info-item .k{font-size:0.72rem;color:var(--low);margin-bottom:3px}
+.info-item .v{font-size:0.85rem;color:var(--hi);font-weight:500;word-break:break-word}
+
+/* ── Admin action form ── */
+.action-section{background:rgba(79,156,249,0.05);border:1px solid rgba(79,156,249,0.15);border-radius:var(--r);padding:16px;margin-top:8px}
+.action-section h4{font-size:0.85rem;font-weight:600;color:var(--accent);margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-row.full{grid-template-columns:1fr}
+.form-group label{display:block;font-size:0.78rem;color:var(--mid);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:9px 12px;color:var(--hi);font-family:'Vazirmatn',sans-serif;font-size:0.85rem;outline:none;transition:border-color .2s;direction:rtl}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group select option{background:#0d1530}
+.form-group textarea{resize:vertical;min-height:70px}
+.btn-save{width:100%;margin-top:12px;padding:11px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;border-radius:8px;color:#fff;font-family:'Vazirmatn',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-save:hover{box-shadow:0 4px 20px rgba(37,99,235,0.5);transform:translateY(-1px)}
+.btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.save-success{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:#34d399;text-align:center;padding:10px;border-radius:8px;font-size:0.85rem;margin-top:10px;display:none}
+
+/* ── Notification ── */
+.btn-notif{position:relative;background:rgba(79,156,249,0.08);border:1px solid rgba(79,156,249,0.2);color:var(--mid);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.btn-notif:hover{background:rgba(79,156,249,0.18);color:var(--hi)}
+.notif-dot{position:absolute;top:5px;right:5px;width:9px;height:9px;background:#f87171;border-radius:50%;border:2px solid var(--bg2);display:none;animation:pdot 1.5s infinite}
+@keyframes pdot{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+.btn-enable-notif{background:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.3);color:#facc15;font-family:'Vazirmatn',sans-serif;font-size:0.78rem;padding:6px 12px;border-radius:8px;cursor:pointer;display:none;align-items:center;gap:6px;transition:all .2s;white-space:nowrap}
+.btn-enable-notif:hover{background:rgba(250,204,21,0.2)}
+/* Notif Panel */
+.notif-panel{position:fixed;top:60px;left:16px;width:300px;background:#0d1530;border:1px solid var(--bd);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:300;display:none;overflow:hidden;direction:rtl;max-height:400px;overflow-y:auto}
+.notif-panel.open{display:block}
+.notif-ph{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;font-size:.83rem;font-weight:600;color:var(--accent);position:sticky;top:0;background:#0d1530}
+.notif-ph button{background:none;border:none;color:var(--low);font-family:'Vazirmatn',sans-serif;font-size:.72rem;cursor:pointer}
+.notif-item{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .2s}
+.notif-item:hover{background:rgba(255,255,255,.04)}
+.notif-item:last-child{border-bottom:none}
+.ni-title{font-size:.82rem;font-weight:600;color:var(--hi);margin-bottom:2px}
+.ni-sub{font-size:.74rem;color:var(--mid)}
+.ni-time{font-size:.7rem;color:var(--low);margin-top:3px}
+.ni-badge{display:inline-block;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3);color:#34d399;font-size:.65rem;padding:1px 6px;border-radius:10px;margin-left:5px}
+/* Toast */
+.toast{position:fixed;bottom:20px;left:20px;background:#0d1530;border:1px solid rgba(52,211,153,.35);border-radius:12px;padding:13px 16px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.5);z-index:9999;animation:tin .35s ease;max-width:300px;direction:rtl;cursor:pointer}
+@keyframes tin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.toast-ic{width:34px;height:34px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+.toast-t{font-size:.83rem;font-weight:700;color:var(--hi);margin-bottom:2px}
+.toast-s{font-size:.75rem;color:var(--mid)}
+.toast-x{position:absolute;top:7px;left:10px;background:none;border:none;color:var(--low);font-size:.95rem;cursor:pointer;line-height:1}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#2a5298;border-radius:2px}
+
+
+/* ── Print Receipt ── */
+@media print {
+  body * { visibility: hidden !important; }
+  #print-area, #print-area * { visibility: visible !important; }
+  #print-area { position: fixed; inset: 0; background: #fff; color: #000; padding: 20px; font-family: Vazirmatn, sans-serif; direction: rtl; z-index: 99999; }
+  .no-print { display: none !important; }
+}
+#print-area { display: none; }
+
+/* ── Lightbox ── */
+#lightbox{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:20px}
+#lightbox.open{display:flex}
+#lightbox img{max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 0 60px rgba(0,0,0,.8)}
+#lightbox video{max-width:100%;max-height:90vh;border-radius:12px}
+#lightbox-close{position:absolute;top:16px;left:16px;width:40px;height:40px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+#lightbox-close:hover{background:rgba(255,255,255,.2)}
+.media-thumb{position:relative;width:120px;height:120px;border-radius:10px;overflow:hidden;border:1px solid rgba(79,156,249,0.3);flex-shrink:0;cursor:pointer;transition:transform .2s,border-color .2s}
+.media-thumb:hover{transform:scale(1.04);border-color:rgba(79,156,249,0.7)}
+.media-thumb img,.media-thumb video{width:100%;height:100%;object-fit:cover}
+.media-thumb .play-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);color:#fff;font-size:1.6rem;pointer-events:none}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6dd5ed" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2>پنل مدیریت</h2>
+      <p>ورود به سیستم تعمیرات</p>
+    </div>
+    <label>نام کاربری</label>
+    <input type="text" id="u-username" placeholder="admin" autocomplete="off">
+    <label>رمز عبور</label>
+    <input type="password" id="u-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">ورود به پنل</button>
+    <div class="login-err" id="login-err">نام کاربری یا رمز عبور اشتباه است</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="ticon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6dd5ed" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      </div>
+      <h1>پنل مدیریت</h1>
+    </div>
+    <div class="topbar-actions">
+      <span class="badge-count" id="total-badge">۰ درخواست</span>
+      <button class="btn-enable-notif" id="btn-enable-notif" onclick="enableNotif()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        فعال‌سازی اعلان
+      </button>
+      <button class="btn-notif" id="btn-notif" onclick="toggleNotifPanel()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot" id="notif-dot"></span>
+      </button>
+      <button class="btn-logout" onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+  <!-- Notif Panel -->
+  <div id="notif-panel" class="notif-panel">
+    <div class="notif-ph">
+      <span>🔔 اعلان‌های جدید</span>
+      <button onclick="clearNotifs()">پاک کردن همه</button>
+    </div>
+    <div id="notif-list"><div style="padding:20px;text-align:center;color:var(--low);font-size:.82rem">اعلانی وجود ندارد</div></div>
+  </div>
+
+  <div class="main-wrap">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">در انتظار بررسی</div>
+        <div class="stat-val" id="s-pending">—</div>
+        <div class="stat-sub">درخواست جدید</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">در حال بررسی</div>
+        <div class="stat-val" id="s-checking">—</div>
+        <div class="stat-sub">در جریان</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">قیمت اعلام شده</div>
+        <div class="stat-val" id="s-priced">—</div>
+        <div class="stat-sub">منتظر تأیید مشتری</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">تعمیر شده</div>
+        <div class="stat-val" id="s-done">—</div>
+        <div class="stat-sub">تحویل داده شده</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter(this,'all')">همه</button>
+      <button class="filter-btn" data-filter="pending" onclick="setFilter(this,'pending')">در انتظار</button>
+      <button class="filter-btn" data-filter="checking" onclick="setFilter(this,'checking')">در بررسی</button>
+      <button class="filter-btn" data-filter="priced" onclick="setFilter(this,'priced')">قیمت داده شده</button>
+      <button class="filter-btn" data-filter="approved" onclick="setFilter(this,'approved')">تأیید شده</button>
+      <button class="filter-btn" data-filter="done" onclick="setFilter(this,'done')">تحویل داده شده</button>
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="جستجو کد، نام، مدل…" oninput="renderTable()">
+      </div>
+      <button class="filter-btn" onclick="loadData()" style="margin-right:auto">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-left:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.01"/></svg>
+        بروزرسانی
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <span>کد پیگیری</span>
+        <span>مشتری</span>
+        <span>دستگاه</span>
+        <span>وضعیت</span>
+        <span>نظر مشتری</span>
+        <span>رضایت</span>
+        <span>قیمت (تومان)</span>
+        <span></span>
+      </div>
+      <div id="table-body">
+        <div class="loading-state">در حال بارگذاری…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <div id="lightbox-close" onclick="closeLightbox()">✕</div>
+  <div id="lightbox-content"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">جزئیات درخواست</h3>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://vufrovnwizovivyyyapx.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1ZnJvdm53aXpvdml2eXl5YXB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA5MTA3MiwiZXhwIjoyMDk2NjY3MDcyfQ.qbxj3ouHj7aLjUJKkHrGcOmMEFRk6aKr77EfAyn2MOM';
+
+const ADMIN_USER = 'yazdani';
+const ADMIN_PASS = 'repair@1404';
+
+let allData = [];
+let currentFilter = 'all';
+
+const statusMap = {
+  pending:  {label:'در انتظار بررسی', cls:'s-pending'},
+  checking: {label:'در حال بررسی',    cls:'s-checking'},
+  priced:   {label:'قیمت اعلام شده',  cls:'s-priced'},
+  approved: {label:'تأیید مشتری',     cls:'s-approved'},
+  done:     {label:'تحویل داده شده',  cls:'s-done'}
+};
+
+function toFa(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);}
+function fmtPrice(p){return p?toFa(Number(p).toLocaleString('fa-IR'))+' تومان':'—'}
+
+// ── Rate Limiting ──
+async function checkRateLimit(action, maxReq, windowMin){
+  try {
+    let ip = 'unknown';
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      const j = await r.json();
+      ip = j.ip;
+    } catch(e){ ip = 'unknown-' + Math.random().toString(36).slice(2,8); }
+    const res = await fetch(`${SB_URL}/rest/v1/rpc/check_rate_limit`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`},
+      body: JSON.stringify({p_ip:ip, p_action:action, p_max_requests:maxReq, p_window_minutes:windowMin})
+    });
+    const allowed = await res.json();
+    return allowed === true;
+  } catch(e){ return true; }
+}
+
+function renderStars(rating, big=false){
+  const size = big ? '1.4rem' : '1rem';
+  const labels = ['','خیلی بد','بد','متوسط','خوب','عالی'];
+  let html = `<span class="admin-stars" style="gap:${big?'4px':'2px'}">`;
+  for(let i=1;i<=5;i++){
+    html += `<span class="s${i<=rating?' on':''}" style="font-size:${size}">★</span>`;
+  }
+  html += `</span>`;
+  if(big && rating) html += `<span style="font-size:.8rem;color:#facc15;margin-right:6px">${labels[rating]}</span>`;
+  return html;
+}
+function fmtDate(s){
+  if(!s) return '—';
+  const d=new Date(s);
+  return d.toLocaleDateString('fa-IR',{year:'numeric',month:'short',day:'numeric'});
+}
+
+// ── Auth ──
+async function doLogin(){
+  const u=document.getElementById('u-username').value.trim();
+  const p=document.getElementById('u-password').value;
+  const errEl=document.getElementById('login-err');
+  errEl.style.display='none';
+
+  // Rate limit: حداکثر ۵ تلاش در ۱۵ دقیقه
+  // (check_rate_limit RPC در Supabase شما فعال نیست - حذف شد)
+
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    sessionStorage.setItem('yz_auth','1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadData();
+    if(Notification.permission==='granted'){ setTimeout(registerServiceWorker,1000); }
+    else if(Notification.permission==='default'){ document.getElementById('btn-enable-notif').style.display='flex'; }
+    // فعال‌سازی خودکار SW اگه مجوز داریم، وگرنه نمایش دکمه
+    if(Notification.permission==='granted'){ registerServiceWorker(); }
+    else if(Notification.permission==='default'){ document.getElementById('btn-enable-notif').style.display='flex'; }
+  } else {
+    errEl.textContent='نام کاربری یا رمز عبور اشتباه است';
+    errEl.style.display='block';
+  }
+}
+function doLogout(){
+  stopRealtime();
+  stopPolling();
+  sessionStorage.removeItem('yz_auth');
+  location.reload();
+}
+if(sessionStorage.getItem('yz_auth')==='1'){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  loadData();
+  // اگه قبلاً مجوز داده - SW رو فعال کن
+  if(Notification.permission==='granted'){
+    registerServiceWorker();
+  }
+}
+
+// ── Data ──
+let knownIds = new Set();
+
+async function loadData(){
+  document.getElementById('table-body').innerHTML='<div class="loading-state">در حال بارگذاری…</div>';
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/repairs?select=*&order=created_at.desc`, {
+      headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}
+    });
+    allData = await res.json();
+    knownIds = new Set(allData.map(r=>r.id));
+    updateStats();
+    renderTable();
+    startRealtime();
+    startPolling();
+    checkNotifPermission();
+    renderNotifList();
+    setTimeout(()=>{ if(swRegistration?.active) swRegistration.active.postMessage({type:'INIT_IDS',ids:allData.map(r=>r.id)}); },2000);
+    // ارسال IDs به SW بعد از لود داده‌ها
+    setTimeout(()=>{
+      if(swRegistration?.active){
+        swRegistration.active.postMessage({ type:'INIT_IDS', ids: allData.map(r=>r.id) });
+      }
+    }, 1500);
+  } catch(e){
+    document.getElementById('table-body').innerHTML='<div class="empty-state">خطا در بارگذاری داده‌ها</div>';
+  }
+}
+
+function updateStats(){
+  const count = s => allData.filter(r=>r.status===s).length;
+  document.getElementById('s-pending').textContent  = toFa(count('pending'));
+  document.getElementById('s-checking').textContent = toFa(count('checking'));
+  document.getElementById('s-priced').textContent   = toFa(count('priced'));
+  document.getElementById('s-done').textContent     = toFa(count('done'));
+  document.getElementById('total-badge').textContent = toFa(allData.length)+' درخواست';
+}
+
+function setFilter(el, f){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = f;
+  renderTable();
+}
+
+function renderTable(){
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  let rows = allData;
+  if(currentFilter !== 'all') rows = rows.filter(r=>r.status===currentFilter);
+  if(q) rows = rows.filter(r=>
+    (r.code||'').toLowerCase().includes(q) ||
+    (r.firstname+' '+r.lastname).toLowerCase().includes(q) ||
+    (r.model||'').toLowerCase().includes(q) ||
+    (r.phone||'').includes(q)
+  );
+
+  if(!rows.length){
+    document.getElementById('table-body').innerHTML='<div class="empty-state">نتیجه‌ای یافت نشد</div>';
+    return;
+  }
+
+  document.getElementById('table-body').innerHTML = rows.map(r=>{
+    const st = statusMap[r.status] || statusMap.pending;
+    // نشان تصمیم مشتری
+    let cdBadge = '';
+    if(r.status === 'priced' || r.customer_decision){
+      if(r.customer_decision==='accepted')
+        cdBadge = '<span class="cd-accepted">✅ تأیید کرد</span>';
+      else if(r.customer_decision==='rejected')
+        cdBadge = '<span class="cd-rejected">❌ انصراف داد</span>';
+      else if(r.status==='priced')
+        cdBadge = '<span class="cd-waiting">⏳ منتظر نظر</span>';
+    }
+    return `<div class="repair-row" onclick="openModal('${r.id}')">
+      <span class="code-badge">${r.code||'—'}</span>
+      <span class="name-cell">${r.firstname||''} ${r.lastname||''}</span>
+      <span class="device-cell">${r.brand||''} ${r.model||''}</span>
+      <span><span class="status-pill ${st.cls}">${st.label}</span></span>
+      <span>${cdBadge}</span>
+      <span>${r.rating ? renderStars(r.rating) : '<span style="color:var(--low);font-size:.72rem">—</span>'}</span>
+      <span class="price-cell">${fmtPrice(r.price)}</span>
+      <span style="display:flex;gap:6px;align-items:center">
+        <span class="btn-detail" onclick="event.stopPropagation();openModal('${r.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </span>
+        <span class="btn-delete-row" onclick="event.stopPropagation();deleteRepair('${r.id}','${r.code}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </span>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+// ── Modal ──
+function openModal(id){
+  const r = allData.find(x=>x.id===id);
+  if(!r) return;
+  const st = statusMap[r.status]||statusMap.pending;
+  document.getElementById('modal-title').textContent = `درخواست ${r.code}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="info-section">
+      <h4>اطلاعات مشتری</h4>
+      <div class="info-grid">
+        <div class="info-item"><div class="k">نام و نام خانوادگی</div><div class="v">${r.firstname} ${r.lastname}</div></div>
+        <div class="info-item"><div class="k">شماره تماس</div><div class="v">${r.phone}</div></div>
+        <div class="info-item"><div class="k">کد ملی</div><div class="v">${r.national_id||'—'}</div></div>
+        <div class="info-item"><div class="k">تاریخ ثبت</div><div class="v">${fmtDate(r.created_at)}</div></div>
+        <div class="info-item full"><div class="k">آدرس</div><div class="v">${r.address||'—'}</div></div>
+        ${r.status==='done' ? `<div class="info-item full"><div class="k">⭐ رضایت مشتری</div><div class="v" style="margin-top:4px">${r.rating ? renderStars(r.rating, true) : '<span style="color:var(--low);font-size:.82rem">هنوز نظری ثبت نشده</span>'}</div></div>` : ''}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>مشخصات دستگاه</h4>
+      <div class="info-grid">
+        <div class="info-item"><div class="k">برند</div><div class="v">${r.brand||'—'}</div></div>
+        <div class="info-item"><div class="k">مدل</div><div class="v">${r.model||'—'}</div></div>
+        <div class="info-item"><div class="k">رنگ</div><div class="v">${r.color||'—'}</div></div>
+        <div class="info-item"><div class="k">نوع خرابی</div><div class="v">${r.issue_type||'—'}</div></div>
+        <div class="info-item full"><div class="k">شرح خرابی</div><div class="v">${r.problem||'—'}</div></div>
+      </div>
+    </div>
+    ${(()=>{
+      let mediaUrls = [];
+      try { if(Array.isArray(r.media_urls)) mediaUrls = r.media_urls; else if(typeof r.media_urls === 'string') mediaUrls = JSON.parse(r.media_urls); } catch(e){ mediaUrls = []; }
+      if(!mediaUrls.length) return '';
+      const items = mediaUrls.map(url=>{
+        const isVideo = /\.(mp4|mov|webm|avi)$/i.test(url) || url.includes('/video/');
+        if(isVideo){
+          return `<div class="media-thumb" onclick="openLightbox('${url}',true)">
+            <video src="${url}" style="width:100%;height:100%;object-fit:cover" muted preload="metadata"></video>
+            <div class="play-icon">▶</div>
+          </div>`;
+        }
+        return `<div class="media-thumb" onclick="openLightbox('${url}',false)">
+          <img src="${url}" loading="lazy">
+        </div>`;
+      }).join('');
+      return `<div class="info-section">
+        <h4>📷 تصاویر و ویدیوهای مشتری</h4>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">${items}</div>
+      </div>`;
+    })()}
+    <div class="action-section">
+      <h4>⚙️ اقدام ادمین</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>وضعیت</label>
+          <select id="a-status">
+            ${Object.entries(statusMap).map(([k,v])=>`<option value="${k}"${r.status===k?' selected':''}>${v.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>قیمت تعمیر (تومان)</label>
+          <input type="number" id="a-price" value="${r.price||''}" placeholder="مثلاً: 850000">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>یادداشت برای مشتری</label>
+          <textarea id="a-note" placeholder="توضیحات تعمیر، قطعات تعویض شده…">${r.admin_note||''}</textarea>
+        </div>
+      </div>
+      ${r.customer_decision ? `
+      <div style="margin-bottom:10px;padding:10px 12px;border-radius:8px;font-size:.83rem;font-weight:600;${r.customer_decision==='accepted'?'background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);color:#34d399':'background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);color:#f87171'}">
+        ${r.customer_decision==='accepted'?'✅ مشتری تعمیر را تأیید کرده است':'❌ مشتری از تعمیر انصراف داده است'}
+      </div>` : r.status==='priced' ? `
+      <div style="margin-bottom:10px;padding:10px 12px;border-radius:8px;font-size:.83rem;background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.25);color:#facc15">
+        ⏳ هنوز منتظر نظر مشتری هستیم
+      </div>` : ''}
+      <button class="btn-save" onclick="saveUpdate('${r.id}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        ذخیره تغییرات
+      </button>
+      <div class="save-success" id="save-ok">✅ تغییرات با موفقیت ذخیره شد</div>
+      <button onclick="printReceipt('${r.id}')" style="width:100%;margin-top:10px;padding:10px;background:rgba(0,212,212,.08);border:1px solid rgba(0,212,212,.25);border-radius:8px;color:#00d4d4;font-family:'Vazirmatn',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(0,212,212,.18)'" onmouseout="this.style.background='rgba(0,212,212,.08)'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        پرینت رسید
+      </button>
+      <button onclick="deleteRepair('${r.id}','${r.code}')" style="width:100%;margin-top:10px;padding:10px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-radius:8px;color:#f87171;font-family:'Vazirmatn',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(248,113,113,.18)'" onmouseout="this.style.background='rgba(248,113,113,.08)'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        حذف این سفارش
+      </button>
+    </div>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function openLightbox(url, isVideo){
+  const lb = document.getElementById('lightbox');
+  const lc = document.getElementById('lightbox-content');
+  if(isVideo){
+    lc.innerHTML = `<video src="${url}" controls autoplay style="max-width:100%;max-height:90vh;border-radius:12px"></video>`;
+  } else {
+    lc.innerHTML = `<img src="${url}" style="max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 0 60px rgba(0,0,0,.8)">`;
+  }
+  lb.classList.add('open');
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-content').innerHTML='';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLightbox(); });
+
+function printReceipt(id){
+  const r = allData.find(x=>x.id===id);
+  if(!r) return;
+
+  const terms = `<div style="margin-top:18px;border-top:1px solid #ccc;padding-top:14px;font-size:10px;line-height:1.9;color:#333">
+    <p style="font-weight:700;margin-bottom:6px">شرایط و ضوابط پذیرش تعمیرات</p>
+    <p><b>قابل توجه مشتریان محترم</b></p>
+    <ol style="padding-right:16px;margin-top:6px">
+      <li>مشتری گرامی، لطفاً پیش از مراجعه برای تحویل دستگاه، از آماده بودن آن اطمینان حاصل فرمایید.</li>
+      <li>مطابق دستور مقام قضایی، اکیداً از تحویل سیم‌کارت و کارت حافظه به تعمیرگاه خودداری نمایید.</li>
+      <li>دستگاه‌های تعمیر شده، صرفاً برای عیب رفع‌شده، به مدت ۳ روز از تاریخ تحویل دارای ضمانت اجرت تعمیر هستند. قطعات تعویض‌شده شامل هیچ‌گونه ضمانتی نمی‌باشند.</li>
+      <li>ایرادات ناشی از تماس دستگاه با مایعات ممکن است به‌طور کامل قابل رفع نباشند و مشمول ضمانت نخواهند بود.</li>
+      <li>در دستگاه‌های دارای آب‌خوردگی، ضربه‌خوردگی یا سابقه تعمیرات قبلی، این مرکز هیچ‌گونه مسئولیتی در قبال بروز مشکلات احتمالی حین تعمیر نخواهد داشت.</li>
+      <li>این مرکز در قبال مشکلات احتمالی حین تعمیر دستگاه‌های غیراستاندارد هیچ‌گونه مسئولیتی ندارد.</li>
+      <li>در برخی موارد امکان از بین رفتن اطلاعات شخصی وجود دارد. لطفاً پیش از تحویل، از اطلاعات مهم نسخه پشتیبان تهیه نمایید.</li>
+      <li>در صورت عدم موجودی قطعات یا طولانی شدن فرآیند تعمیر، مسئولیتی متوجه این واحد نخواهد بود.</li>
+      <li>این رسید تا یک ماه پس از اتمام تعمیرات معتبر است. عدم مراجعه تا ۶ ماه، دستگاه مطابق مقررات قانونی تعیین تکلیف خواهد شد.</li>
+      <li>برگه‌های پذیرش پس از تحویل دستگاه، به مدت یک ماه نگهداری می‌شوند.</li>
+    </ol>
+    <div style="margin-top:14px;border-top:1px dashed #ccc;padding-top:10px">
+      <p>اینجانب ....................................................... ضمن مطالعه کامل موارد فوق، تمامی شرایط را تأیید می‌نمایم.</p>
+      <div style="display:flex;justify-content:space-between;margin-top:10px">
+        <p>امضای مشتری: ..............................</p>
+        <p>امضای تعمیرگاه: ............................</p>
+      </div>
+    </div>
+    <div style="margin-top:14px;border-top:1px dashed #ccc;padding-top:10px">
+      <p>اینجانب ....................................................... گواهی می‌نمایم دستگاه فوق را در تاریخ ...... / ...... / ........ صحیح و سالم تحویل گرفته‌ام.</p>
+      <p style="margin-top:8px">امضای تحویل‌گیرنده: ..............................</p>
+    </div>
+  </div>`;
+
+  const html = `<div id="print-area" style="display:block;position:fixed;inset:0;background:#fff;color:#000;padding:24px;font-family:Vazirmatn,sans-serif;direction:rtl;z-index:99999;overflow:auto">
+    <div style="max-width:700px;margin:0 auto">
+      <!-- هدر -->
+      <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img src="data:image/png;base64,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" style="width:80px;height:80px;object-fit:contain" alt="یزدانی ریپر">
+          <div>
+            <div style="font-size:18px;font-weight:700">تعمیرگاه یزدانی</div>
+            <div style="font-size:11px;color:#555">تلفن: 09354053871</div>
+          </div>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:11px;color:#555">کد پیگیری</div>
+          <div style="font-size:16px;font-weight:700;letter-spacing:1px">${r.code}</div>
+          <div style="font-size:10px;color:#777">${new Date(r.created_at).toLocaleDateString('fa-IR')}</div>
+        </div>
+      </div>
+
+      <!-- اطلاعات مشتری و دستگاه -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div style="border:1px solid #ddd;border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:#444;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">اطلاعات مشتری</div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse">
+            <tr><td style="color:#777;padding:3px 0">نام:</td><td style="font-weight:600">${r.firstname} ${r.lastname}</td></tr>
+            <tr><td style="color:#777;padding:3px 0">تماس:</td><td>${r.phone}</td></tr>
+            <tr><td style="color:#777;padding:3px 0">کد ملی:</td><td>${r.national_id||'—'}</td></tr>
+            <tr><td style="color:#777;padding:3px 0">آدرس:</td><td>${r.address||'—'}</td></tr>
+          </table>
+        </div>
+        <div style="border:1px solid #ddd;border-radius:8px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:#444;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px">مشخصات دستگاه</div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse">
+            <tr><td style="color:#777;padding:3px 0">برند:</td><td style="font-weight:600">${r.brand||'—'}</td></tr>
+            <tr><td style="color:#777;padding:3px 0">مدل:</td><td>${r.model||'—'}</td></tr>
+            <tr><td style="color:#777;padding:3px 0">رنگ:</td><td>${r.color||'—'}</td></tr>
+            <tr><td style="color:#777;padding:3px 0">نوع خرابی:</td><td>${r.issue_type||'—'}</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- شرح خرابی -->
+      <div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">شرح خرابی</div>
+        <div style="font-size:11px;line-height:1.8">${r.problem||'—'}</div>
+      </div>
+
+      ${r.price ? `<div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:16px;background:#f9f9f9">
+        <div style="font-size:11px;font-weight:700;color:#444;margin-bottom:4px">هزینه تعمیر</div>
+        <div style="font-size:16px;font-weight:700">${Number(r.price).toLocaleString('fa-IR')} تومان</div>
+        ${r.admin_note ? `<div style="font-size:10px;color:#666;margin-top:4px">${r.admin_note}</div>` : ''}
+      </div>` : ''}
+
+      ${terms}
+
+      <!-- دکمه پرینت -->
+      <div style="text-align:center;margin-top:20px" class="no-print">
+        <button onclick="window.print()" style="background:#000;color:#fff;border:none;padding:10px 30px;border-radius:8px;font-family:Vazirmatn,sans-serif;font-size:14px;cursor:pointer;margin-left:10px">🖨️ پرینت</button>
+        <button onclick="document.getElementById('print-area').remove()" style="background:#eee;color:#333;border:none;padding:10px 30px;border-radius:8px;font-family:Vazirmatn,sans-serif;font-size:14px;cursor:pointer">بستن</button>
+      </div>
+    </div>
+  </div>`;
+
+  const old = document.getElementById('print-area');
+  if(old) old.remove();
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+document.getElementById('modal').addEventListener('click', e=>{
+  if(e.target===document.getElementById('modal')) closeModal();
+});
+
+async function saveUpdate(id){
+  const btn = document.querySelector('.btn-save');
+  btn.disabled=true;
+  btn.innerHTML='در حال ذخیره…';
+  const payload = {
+    status: document.getElementById('a-status').value,
+    price: parseInt(document.getElementById('a-price').value)||null,
+    admin_note: document.getElementById('a-note').value.trim()||null
+  };
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/repairs?id=eq.${id}`, {
+      method:'PATCH',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SB_KEY,
+        'Authorization':`Bearer ${SB_KEY}`,
+        'Prefer':'return=minimal'
+      },
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error();
+    const idx = allData.findIndex(r=>r.id===id);
+    if(idx>-1) Object.assign(allData[idx], payload);
+    updateStats();
+    renderTable();
+    document.getElementById('save-ok').style.display='block';
+    setTimeout(()=>document.getElementById('save-ok').style.display='none', 3000);
+  } catch(e){
+    alert('خطا در ذخیره. دوباره تلاش کنید.');
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ذخیره تغییرات';
+  }
+}
+
+async function deleteRepair(id, code){
+  if(!confirm(`آیا مطمئنید می‌خواهید سفارش ${code} را حذف کنید؟\nاین عمل قابل بازگشت نیست.`)) return;
+  try{
+    // return=representation تا بفهمیم واقعاً چند ردیف حذف شد
+    const res = await fetch(`${SB_URL}/rest/v1/repairs?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{
+        'apikey':SB_KEY,
+        'Authorization':`Bearer ${SB_KEY}`,
+        'Prefer':'return=representation',
+        'Content-Type':'application/json'
+      }
+    });
+
+    const body = await res.json().catch(()=>[]);
+
+    if(!res.ok){
+      const msg = res.status===401||res.status===403
+        ? '⚠️ دسترسی رد شد.\n\nدر Supabase → Table Editor → repairs → RLS\nیک Policy برای DELETE اضافه کنید یا RLS را غیرفعال کنید.'
+        : `خطا در حذف (${res.status})`;
+      alert(msg);
+      return;
+    }
+
+    // اگه آرایه خالی برگشت یعنی RLS جلوش رو گرفته بدون خطا
+    if(Array.isArray(body) && body.length === 0){
+      alert('⚠️ سفارش حذف نشد.\n\nاحتمالاً RLS در Supabase اجازه DELETE نمیده.\nدر Supabase → Authentication → Policies\nیک Policy برای DELETE روی جدول repairs بسازید.');
+      return;
+    }
+
+    allData = allData.filter(r=>r.id!==id);
+    knownIds.delete(id);
+    closeModal();
+    updateStats();
+    renderTable();
+  }catch(e){
+    alert('خطا در حذف سفارش: ' + e.message);
+  }
+}
+
+// ════════════════════════════════
+// ── سیستم اعلان ──
+// ════════════════════════════════
+let notifList = JSON.parse(sessionStorage.getItem('yz_notifs')||'[]');
+let realtimeWs = null;
+let realtimeRetry = null;
+let pollTimer = null;
+let audioCtx = null;
+
+function saveNotifs(){ sessionStorage.setItem('yz_notifs', JSON.stringify(notifList)); }
+
+// ── صدای نوتیف ──
+function playSound(){
+  try {
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.setValueAtTime(900, audioCtx.currentTime);
+    o.frequency.setValueAtTime(1200, audioCtx.currentTime+0.1);
+    g.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.45);
+    o.start(); o.stop(audioCtx.currentTime+0.45);
+  } catch(e){}
+}
+
+// ── Toast ──
+function showToast(title, sub, id){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-ic">🔔</div><div><div class="toast-t">${title}</div><div class="toast-s">${sub}</div></div><button class="toast-x" onclick="event.stopPropagation();this.parentElement.remove()">✕</button>`;
+  if(id) t.addEventListener('click', ()=>{ openModal(id); t.remove(); });
+  document.body.appendChild(t);
+  setTimeout(()=>{ if(t.parentElement) t.remove(); }, 7000);
+}
+
+// ── ثبت اعلان جدید ──
+function addNotif(r){
+  const n = {
+    id: r.id,
+    code: r.code||'—',
+    name: `${r.firstname||''} ${r.lastname||''}`.trim(),
+    device: `${r.brand||''} ${r.model||''}`.trim(),
+    time: new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}),
+  };
+  notifList.unshift(n);
+  if(notifList.length>40) notifList=notifList.slice(0,40);
+  saveNotifs();
+  renderNotifList();
+  document.getElementById('notif-dot').style.display = 'block';
+  playSound();
+  showToast('📋 درخواست جدید: '+n.code, n.name+' — '+n.device, r.id);
+  if(Notification.permission==='granted'){
+    new Notification('📋 درخواست تعمیر جدید',{
+      body: n.code+' | '+n.name+' | '+n.device,
+      icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔔</text></svg>'
+    });
+  }
+}
+
+// ── رندر لیست اعلان ──
+function renderNotifList(){
+  const el = document.getElementById('notif-list');
+  if(!notifList.length){
+    el.innerHTML='<div style="padding:20px;text-align:center;color:var(--low);font-size:.82rem">اعلانی وجود ندارد</div>';
+    return;
+  }
+  el.innerHTML = notifList.map(n=>`
+    <div class="notif-item" onclick="closeNotifPanel();openModal('${n.id}')">
+      <div class="ni-title"><span class="ni-badge">جدید</span>${n.code}</div>
+      <div class="ni-sub">${n.name} — ${n.device}</div>
+      <div class="ni-time">${n.time}</div>
+    </div>`).join('');
+}
+
+function toggleNotifPanel(){
+  const p = document.getElementById('notif-panel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    document.getElementById('notif-dot').style.display='none';
+    renderNotifList();
+  }
+}
+function closeNotifPanel(){ document.getElementById('notif-panel').classList.remove('open'); }
+function clearNotifs(){ notifList=[]; saveNotifs(); renderNotifList(); }
+document.addEventListener('click', e=>{
+  const p=document.getElementById('notif-panel'), b=document.getElementById('btn-notif');
+  if(p && p.classList.contains('open') && !p.contains(e.target) && !b.contains(e.target)) closeNotifPanel();
+});
+
+// ── مجوز نوتیفیکیشن ──
+function checkNotifPermission(){
+  const btn = document.getElementById('btn-enable-notif');
+  if(!btn||!('Notification' in window)) return;
+  btn.style.display = Notification.permission==='default' ? 'flex' : 'none';
+}
+async function enableNotif(){ await requestNotifAndRegisterSW(); }
+
+// ── Supabase Realtime WebSocket ──
+function startRealtime(){
+  if(realtimeWs) return;
+  const wsUrl = SB_URL.replace('https://','wss://')+'/realtime/v1/websocket?apikey='+SB_KEY+'&vsn=1.0.0';
+  function connect(){
+    try{ realtimeWs = new WebSocket(wsUrl); } catch(e){ scheduleRetry(); return; }
+    realtimeWs.onopen = ()=>{
+      realtimeWs.send(JSON.stringify({topic:'realtime:public:repairs',event:'phx_join',payload:{},ref:'1'}));
+      realtimeWs._hb = setInterval(()=>{
+        if(realtimeWs.readyState===WebSocket.OPEN)
+          realtimeWs.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:'hb'}));
+      },25000);
+    };
+    realtimeWs.onmessage = evt=>{
+      try{
+        const msg = JSON.parse(evt.data);
+        if(msg.event==='INSERT' && msg.payload?.record){
+          const r = msg.payload.record;
+          if(!knownIds.has(r.id)){ knownIds.add(r.id); allData.unshift(r); updateStats(); renderTable(); addNotif(r); }
+        }
+      }catch(e){}
+    };
+    realtimeWs.onerror = ()=>{};
+    realtimeWs.onclose = ()=>{ clearInterval(realtimeWs._hb); realtimeWs=null; scheduleRetry(); };
+  }
+  function scheduleRetry(){ clearTimeout(realtimeRetry); realtimeRetry=setTimeout(connect,5000); }
+  connect();
+}
+function stopRealtime(){ clearTimeout(realtimeRetry); if(realtimeWs){realtimeWs.close();realtimeWs=null;} }
+
+// ── Polling fallback هر ۳۰ ثانیه ──
+async function pollNewRepairs(){
+  try{
+    const res = await fetch(`${SB_URL}/rest/v1/repairs?select=*&order=created_at.desc`,{headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}});
+    const data = await res.json();
+    const newOnes = data.filter(r=>!knownIds.has(r.id));
+    if(newOnes.length){ newOnes.forEach(r=>{knownIds.add(r.id);allData.unshift(r);addNotif(r);}); updateStats(); renderTable(); }
+  }catch(e){}
+}
+function startPolling(){ if(!pollTimer) pollTimer=setInterval(pollNewRepairs,30000); }
+function stopPolling(){ clearInterval(pollTimer); pollTimer=null; }
+
+// ══════════════════════════════════════════════
+// ── Service Worker - اعلان حتی با مرورگر بسته ──
+// ══════════════════════════════════════════════
+let swRegistration = null;
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) { console.warn('SW not supported'); return; }
+  try {
+    swRegistration = await navigator.serviceWorker.register('sw.js', { scope: './' });
+    // ارسال IDs موجود
+    const sendIds = () => {
+      if (swRegistration.active && allData.length) {
+        swRegistration.active.postMessage({ type:'INIT_IDS', ids: allData.map(r=>r.id) });
+      }
+    };
+    navigator.serviceWorker.ready.then(sendIds);
+    setTimeout(sendIds, 2000);
+    // دریافت پیام از SW
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data && e.data.type === 'NEW_ORDER') {
+        const r = e.data.order;
+        if (!knownIds.has(r.id)) {
+          knownIds.add(r.id); allData.unshift(r); updateStats(); renderTable(); addNotif(r);
+        }
+      }
+      if (e.data && e.data.type === 'OPEN_ORDER') { openModal(e.data.orderId); }
+    });
+    console.log('SW registered');
+  } catch(err) { console.warn('SW failed:', err); }
+}
+
+async function requestNotifAndRegisterSW() {
+  if (!('Notification' in window)) return;
+  let perm = Notification.permission;
+  if (perm === 'default') perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    await registerServiceWorker();
+    document.getElementById('btn-enable-notif').style.display = 'none';
+    showToast('✅ اعلان‌ها فعال شدند', 'حتی با بسته بودن مرورگر اعلان دریافت می‌کنید', null);
+  } else {
+    showToast('⚠️ مجوز رد شد', 'از تنظیمات مرورگر اجازه بدید', null);
+  }
+}
+
+</script>
