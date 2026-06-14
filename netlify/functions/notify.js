@@ -1,12 +1,13 @@
 exports.handler = async (event) => {
   try {
     const { code, name, brand, model } = JSON.parse(event.body);
+    const apiKey = process.env.ONESIGNAL_API_KEY;
 
     const res = await fetch("https://api.onesignal.com/notifications", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Key os_v2_app_e3lj5cc65fbnniu7k5fu6bwru7gu6qz7hlfepm4tuubvyx2wevh4pqeokavucazh2rgibzzg7kycokqy5k3ghmmq7i34u7ixmhwi7vi"
+        "Authorization": "Key " + apiKey
       },
       body: JSON.stringify({
         app_id: "26d69e88-5ee9-42d6-a29f-574b4f06d1a7",
