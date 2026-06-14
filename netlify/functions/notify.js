@@ -2,6 +2,10 @@ exports.handler = async (event) => {
   try {
     const { code, name, brand, model } = JSON.parse(event.body);
     const apiKey = process.env.ONESIGNAL_API_KEY;
+    
+    console.log("API Key exists:", !!apiKey);
+    console.log("API Key length:", apiKey ? apiKey.length : 0);
+    console.log("API Key prefix:", apiKey ? apiKey.substring(0, 20) : "none");
 
     const res = await fetch("https://api.onesignal.com/notifications", {
       method: "POST",
@@ -10,7 +14,7 @@ exports.handler = async (event) => {
         "Authorization": "Key " + apiKey
       },
       body: JSON.stringify({
-        app_id: "26d69e88-5ee9-42d6-a29f-574b4f06d1a7",
+        app_id: "46974e82-acd7-422b-966a-aa4bdc5e5f99",
         included_segments: ["Total Subscriptions"],
         headings: { en: "درخواست جدید ثبت شد ✅" },
         contents: { en: "مشتری: " + name + " | دستگاه: " + brand + " " + model + " | کد: " + code },
