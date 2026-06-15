@@ -18,7 +18,7 @@ exports.handler = async (event) => {
         included_segments: ["Total Subscriptions"],
         headings: { en: "درخواست جدید ثبت شد ✅" },
         contents: { en: "مشتری: " + name + " | دستگاه: " + brand + " " + model + " | کد: " + code },
-        url: "https://ni-repairs.netlify.app/admin-7-2-4-6.html"
+        url: "https://yazdani-repairs.netlify.app/admin-7-2-4-6.html"
       })
     });
 
